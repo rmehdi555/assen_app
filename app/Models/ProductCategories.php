@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -16,10 +15,7 @@ class ProductCategories extends Model
     use SoftDeletes;
     protected $fillable = [
         'title', 'slug', 'description','body','parent_id','images','tags','icon','priority','status',
-        'seo_title','seo_description','seo_follow','seo_index','seo_canonical'
-    ];
-    protected $casts = [
-        'images' => 'array'
+        'seo_title','seo_description','seo_follow','seo_index','seo_canonical','is_show'
     ];
     /**
 
@@ -31,20 +27,8 @@ class ProductCategories extends Model
 
      */
     protected $dates = ['deleted_at'];
-    use Sluggable;
-    /**
-     * Return the sluggable configuration array for this model.
-     *
-     * @return array
-     */
-    public function sluggable()
-    {
-        return [
-            'slug' => [
-                'source' => 'title'
-            ]
-        ];
-    }
+
+
 
     public function parent()
     {

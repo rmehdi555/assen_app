@@ -20,4 +20,5 @@ return [
     |
     */
     'paginate_count' => 10,
+    'exchange_price' => 'IRR',
 ];

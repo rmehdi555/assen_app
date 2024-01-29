@@ -16,7 +16,7 @@ class ArticlesController extends Controller
     public function index(ArticlesIndexRequest $request): JsonResponse
     {
         $articles = Article::where('is_show', true)->with(['category', 'thumbnail', 'author'])->latest()
-            ->paginate($request->count);
+            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
         return $this->successResponse([
             'articles' => ArticleindexResource::collection($articles),
             'total' => $articles->total(),
@@ -28,8 +28,8 @@ class ArticlesController extends Controller
 
     public function show($slug): JsonResponse
     {
-        $article = Article::whereSlug($slug)->where('is_show', true)->where('category_id', '!=', 15)
-            ->with(['category', 'thumbnail', 'seo', 'tags', 'author'])->first();
+        $article = Article::whereSlug($slug)->where('is_show', true)
+            ->with(['category', 'thumbnail'])->first();
         if (!$article)
             return $this->errorResponse(__('messages.field_not_find'), 404);
         $article->increment('view_count');

@@ -13,9 +13,7 @@ class Factories extends Model
         'title','body','slug','images','priority','status','product_categories_id','tag_title',
         'seo_title','seo_description','seo_follow','seo_index','seo_canonical','schema'
     ];
-    protected $casts = [
-        'images' => 'array'
-    ];
+
     /**
 
      * The attributes that should be mutated to dates.
@@ -27,23 +25,9 @@ class Factories extends Model
      */
     protected $dates = ['deleted_at'];
 
-//    use Sluggable;
-//    /**
-//     * Return the sluggable configuration array for this model.
-//     *
-//     * @return array
-//     */
-//    public function sluggable()
-//    {
-//        return [
-//            'slug' => [
-//                'source' => 'title'
-//            ]
-//        ];
-//    }
 
     public function category()
     {
-        return $this->hasOne('App\ProductCategories', 'id', 'product_categories_id');
+        return $this->hasOne(ProductCategories::class, 'id', 'product_categories_id');
     }
 }

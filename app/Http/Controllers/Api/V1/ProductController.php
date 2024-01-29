@@ -6,88 +6,214 @@ use App\Classes\AxessoWebService;
 use App\Classes\AxessoWebServiceDTO;
 use App\Classes\Calculator;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Product\ProductIndexRequest;
+use App\Http\Resources\ProductIndexResource;
+use App\Models\Article;
 use App\Models\CrawlerProduct;
+use App\Models\Factories;
+use App\Models\ProductCategories;
+use App\Models\Products;
+use App\Models\Sizes;
+use App\Models\Standards;
 use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
-    public function show($asin): JsonResponse
+    public function category($slug, ProductIndexRequest $request)
     {
-        $product = CrawlerProduct::where('asin', $asin)->first();
-        if (!filled($product) or $product->is_banned == 1 or $product->title==null)
-            return $this->errorResponse(__('messages.item_not_found'), 404);
-        $product->setHidden(['response']);
-        $product->increment('view_count');
-        $priceRial = Calculator::singleProduct(
-            $product['price'],
-            $product['weight_unit'],
-            $product['exchange_type'],
-            $product['region_type'],
-            $product['weight']
-        );
-//        $priceRial['buyCost'] = showAmount($priceRial['buyCost']);
-//        $priceRial['shipBroker'] = showAmount($priceRial['shipBroker']);
-//        $priceRial['buyProfit'] = showAmount($priceRial['buyProfit']);
-//        $priceRial['buyPrice'] = showAmount($priceRial['buyPrice']);
-//        $priceRial['finalResult'] = showAmount($priceRial['finalResult']);
-//        $priceRial['finalRialPrice'] = showAmount($priceRial['finalRialPrice']);
-//        $priceRial['bBroker'] = showAmount($priceRial['bBroker']);
-//        $priceRial['exchangeValue'] = showAmount((int)$priceRial['exchangeValue']);
-        if ($product['ratings']==0){
-            $product['ratings']='0';
+        $category = ProductCategories::whereSlug($slug)->where('is_show', true)->first();
+        if (!$category)
+            return $this->errorResponse(__('messages.field_not_find'), 404);
+
+        if (isset($request->factory_slug))
+            $factory = Factories::whereSlug($request->factory_slug)->where('is_show', true)->first();
+
+        if (isset($request->standard_slug))
+            $standard = Standards::whereSlug($request->standard_slug)->where('is_show', true)->first();
+
+        if (isset($request->size_slug))
+            $size = Sizes::whereSlug($request->size_slug)->where('is_show', true)->first();
+
+
+        $products = Products::where('is_show', true)->with(['category', 'thumbnail'])
+            ->where('products.product_categories_id', $category->id)
+            ->when(
+                isset($factory->id),
+                fn($q) => $q->where('products.factory_id', $factory->id)
+            )
+            ->when(
+                isset($standard->id),
+                fn($q) => $q->where('products.standard_id', $standard->id)
+            )
+            ->when(
+                isset($size->id),
+                fn($q) => $q->where('products.size_id', $size->id)
+            )
+            ->when(
+                isset($request->q),
+                fn($q) => $q->where('products.title', 'Like', '%' . $request->q . '%')
+            )
+            ->latest()
+            ->get();
+//            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
+
+        $data = [];
+        foreach ($products->groupBy('factory_id') as $key => $value) {
+            $factory = Factories::find($key);
+            $data[] = [
+                'factory_title' => $factory->title,
+                'factory_slug' => $factory->slug,
+                'products' => ProductIndexResource::collection($value)
+            ];
         }
-        if ($product['price_saving']==0){
-            $product['price_saving']='0';
-        }
-        if ($product['retail_price']==0){
-            $product['retail_price']='0';
-        }
+
+        if (!empty($category->images))
+            $image = ['path' => config('app.admin_site_url_file_old') . json_decode($category->images)->images->original, 'caption' => $category->title];
+        else
+            $image = ['path' => config('app.admin_site_url_file') . $category->thumbnail->path, 'caption' => $category->thumbnail->caption];
         return $this->successResponse([
-            'data' => ['details' => $product, 'financial' => $priceRial],
+            'image_path' => $image['path'],
+            'image_caption' => $image['caption'],
+            'title' => $category->title,
+            'body' => $category->body,
+            'seo_title' => $category->seo_title,
+            'seo_description' => $category->seo_description,
+            'seo_follow' => $category->seo_follow,
+            'seo_index' => $category->seo_index,
+            'seo_canonical' => $category->seo_canonical,
+            'data' => $data,
         ], __('messages.item_found_success'));
+
+
     }
 
-    public function refresh($asin): JsonResponse
+    public function factory($slug, ProductIndexRequest $request)
     {
-        $product = CrawlerProduct::where('asin', $asin)->first();
-        if (!filled($product) or $product->is_banned == 1)
-            return $this->errorResponse(__('messages.item_not_found'), 404);
+        $factory = Factories::whereSlug($slug)->where('is_show', true)->first();
+        if (!$factory)
+            return $this->errorResponse(__('messages.field_not_find'), 404);
 
-        $response = json_decode((new AxessoWebService)->amazonProductInfo($product->url), true);
-        if (isset($response[0]['logref']))
-            return $this->errorResponse(__('messages.url_entered_invalid'));
+        if (isset($request->standard_slug))
+            $standard = Standards::whereSlug($request->standard_slug)->where('is_show', true)->first();
 
-        $data = AxessoWebServiceDTO::extractDetail($response, $product->url);
-        $data['region'] = 1;
+        if (isset($request->size_slug))
+            $size = Sizes::whereSlug($request->size_slug)->where('is_show', true)->first();
 
-        if ($data['productRating']==0){
-            $data['productRating']='0';
-        }
-        $product->update([
-            'title' => $data['productTitle'],
-            'price' => $data['price'],
-            'retail_price' => $data['retailPrice'] ?? 0,
-            'price_saving' => $data['priceSaving'] ?? 0,
-            'ratings' => $data['productRating'],
-            'images' => $data['imageUrlList'],
-            'description' => $data['productDescription'],
-            'reviews' => $data['reviews'],
-            'videos' => $data['videoeUrlList'],
-            'details' => $data['productDetails'],
-            'features' => $data['features'],
-            'exchange_type' => $data['exchangeType'],
-            'exchange_name' => $data['exchangeName'],
-            'region_type' => $data['region'],
-            'region_name' => $data['regionName'],
-            'weight' => $data['finalWeight'],
-            'weight_unit' => $data['massUnit'],
-            'categories' => $data['categories'],
-            'variations' => $data['variations'],
-            'response' => $response,
-        ]);
 
+        $products = Products::where('is_show', true)->with(['category', 'thumbnail'])
+            ->where('products.factory_id', $factory->id)
+            ->when(
+                isset($standard->id),
+                fn($q) => $q->where('products.standard_id', $standard->id)
+            )
+            ->when(
+                isset($size->id),
+                fn($q) => $q->where('products.size_id', $size->id)
+            )
+            ->when(
+                isset($request->q),
+                fn($q) => $q->where('products.title', 'Like', '%' . $request->q . '%')
+            )
+            ->latest()
+            ->get();
+//            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
+
+
+        if (!empty($factory->images))
+            $image = ['path' => config('app.admin_site_url_file_old') . json_decode($factory->images)->images->original, 'caption' => $factory->title];
+        else
+            $image = ['path' => config('app.admin_site_url_file') . $factory->thumbnail->path, 'caption' => $factory->thumbnail->caption];
         return $this->successResponse([
-            'asin' => $asin,
-        ], __('messages.item_refresh_success'));
+            'image_path' => $image['path'],
+            'image_caption' => $image['caption'],
+            'title' => $factory->title,
+            'body' => $factory->body,
+            'seo_title' => $factory->seo_title,
+            'seo_description' => $factory->seo_description,
+            'seo_follow' => $factory->seo_follow,
+            'seo_index' => $factory->seo_index,
+            'seo_canonical' => $factory->seo_canonical,
+            'data' => ProductIndexResource::collection($products),
+        ], __('messages.item_found_success'));
+
+
+    }
+
+    public function size($slug, ProductIndexRequest $request)
+    {
+        $size = Sizes::whereSlug($slug)->where('is_show', true)->first();
+        if (!$size)
+            return $this->errorResponse(__('messages.field_not_find'), 404);
+
+        if (isset($request->factory_slug))
+            $factory = Factories::whereSlug($request->factory_slug)->where('is_show', true)->first();
+
+        if (isset($request->standard_slug))
+            $standard = Standards::whereSlug($request->standard_slug)->where('is_show', true)->first();
+
+
+        $products = Products::where('is_show', true)->with(['category', 'thumbnail'])
+            ->where('products.size_id', $size->id)
+            ->when(
+                isset($standard->id),
+                fn($q) => $q->where('products.standard_id', $standard->id)
+            )
+            ->when(
+                isset($factory->id),
+                fn($q) => $q->where('products.factory_id', $factory->id)
+            )
+            ->when(
+                isset($request->q),
+                fn($q) => $q->where('products.title', 'Like', '%' . $request->q . '%')
+            )
+            ->latest()
+            ->get();
+//            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
+
+
+        if (!empty($size->images))
+            $image = ['path' => config('app.admin_site_url_file_old') . json_decode($size->images)->images->original, 'caption' => $size->title];
+        else
+            $image = ['path' => config('app.admin_site_url_file') . $size->thumbnail->path, 'caption' => $size->thumbnail->caption];
+        return $this->successResponse([
+            'image_path' => $image['path'],
+            'image_caption' => $image['caption'],
+            'title' => $size->title,
+            'body' => $size->body,
+            'seo_title' => $size->seo_title,
+            'seo_description' => $size->seo_description,
+            'seo_follow' => $size->seo_follow,
+            'seo_index' => $size->seo_index,
+            'seo_canonical' => $size->seo_canonical,
+            'data' => ProductIndexResource::collection($products),
+        ], __('messages.item_found_success'));
+
+
+    }
+
+
+    public function show($slug)
+    {
+        $product = Products::whereSlug($slug)->where('is_show', true)->first();
+        if (!$product)
+            return $this->errorResponse(__('messages.field_not_find'), 404);
+
+        if (!empty($product->images))
+            $image = ['path' => config('app.admin_site_url_file_old') . json_decode($product->images)->images->original, 'caption' => $product->title];
+        else
+            $image = ['path' => config('app.admin_site_url_file') . $product->thumbnail->path, 'caption' => $product->thumbnail->caption];
+        return $this->successResponse([
+            'image_path' => $image['path'],
+            'image_caption' => $image['caption'],
+            'title' => $product->title,
+            'body' => $product->body,
+            'seo_title' => $product->seo_title,
+            'seo_description' => $product->seo_description,
+            'seo_follow' => $product->seo_follow,
+            'seo_index' => $product->seo_index,
+            'seo_canonical' => $product->seo_canonical,
+        ], __('messages.item_found_success'));
+
+
     }
 }
