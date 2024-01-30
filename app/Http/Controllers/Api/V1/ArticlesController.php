@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Articles\ArticlesCategoryRequest;
 use App\Http\Requests\V1\Articles\ArticlesIndexRequest;
 use App\Http\Resources\ArticleindexResource;
+use App\Http\Resources\ArticleShowResource;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +34,7 @@ class ArticlesController extends Controller
         if (!$article)
             return $this->errorResponse(__('messages.field_not_find'), 404);
         $article->increment('view_count');
-        $data = new ArticleindexResource($article);
+        $data = new ArticleShowResource($article);
         return $this->successResponse($data, '');
     }
 

@@ -38,7 +38,6 @@ class ProductIndexResource extends JsonResource
             'standard_slug' => $this->standard->slug,
             'title' => $this->title,
             'slug' => $this->slug,
-            'body' => $this->body,
             'price' => $price,
             'place_of_delivery' => ProductDelivery::fromName($this->place_of_delivery)->value,
             'updated_at' => showDate($this->updated_at),

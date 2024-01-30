@@ -7,7 +7,9 @@ use App\Classes\AxessoWebServiceDTO;
 use App\Classes\Calculator;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Product\ProductIndexRequest;
+use App\Http\Resources\FactoryIndexResource;
 use App\Http\Resources\ProductIndexResource;
+use App\Http\Resources\SizeIndexResource;
 use App\Models\Article;
 use App\Models\CrawlerProduct;
 use App\Models\Factories;
@@ -53,10 +55,12 @@ class ProductController extends Controller
                 isset($request->q),
                 fn($q) => $q->where('products.title', 'Like', '%' . $request->q . '%')
             )
-            ->latest()
+            ->orderBy('priority','desc')
             ->get();
 //            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
 
+        $factories = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
+        $sizes = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
         $data = [];
         foreach ($products->groupBy('factory_id') as $key => $value) {
             $factory = Factories::find($key);
@@ -82,6 +86,8 @@ class ProductController extends Controller
             'seo_index' => $category->seo_index,
             'seo_canonical' => $category->seo_canonical,
             'data' => $data,
+            'factories' => FactoryIndexResource::collection($factories),
+            'sizes' => SizeIndexResource::collection($sizes),
         ], __('messages.item_found_success'));
 
 
@@ -118,7 +124,8 @@ class ProductController extends Controller
             ->get();
 //            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
 
-
+        $factories = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
+        $sizes = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
         if (!empty($factory->images))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($factory->images)->images->original, 'caption' => $factory->title];
         else
@@ -134,6 +141,8 @@ class ProductController extends Controller
             'seo_index' => $factory->seo_index,
             'seo_canonical' => $factory->seo_canonical,
             'data' => ProductIndexResource::collection($products),
+            'factories' => FactoryIndexResource::collection($factories),
+            'sizes' => SizeIndexResource::collection($sizes),
         ], __('messages.item_found_success'));
 
 
@@ -170,7 +179,8 @@ class ProductController extends Controller
             ->get();
 //            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
 
-
+        $factories = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
+        $sizes = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
         if (!empty($size->images))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($size->images)->images->original, 'caption' => $size->title];
         else
@@ -186,6 +196,8 @@ class ProductController extends Controller
             'seo_index' => $size->seo_index,
             'seo_canonical' => $size->seo_canonical,
             'data' => ProductIndexResource::collection($products),
+            'factories' => FactoryIndexResource::collection($factories),
+            'sizes' => SizeIndexResource::collection($sizes),
         ], __('messages.item_found_success'));
 
 

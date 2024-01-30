@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ArticleindexResource extends JsonResource
+class ArticleShowResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -21,8 +21,9 @@ class ArticleindexResource extends JsonResource
         return [
             'category' => ['title' => $this->category->title, 'slug' => $this->category->slug],
             'title' => $this->title,
-            'slug' => $this->slug,
             'description' => $this->description,
+            'slug' => $this->slug,
+            'body' => $this->body,
             'image' => $image,
             'seo_title' => $this->seo_title,
             'seo_description' => $this->seo_description,
