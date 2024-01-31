@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\CheckUrlController;
 use App\Http\Controllers\Api\V1\ContactController;
 use App\Http\Controllers\Api\V1\DashbboardController;
 use App\Http\Controllers\Api\V1\EbayProdouctController;
+use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\LandingController;
 use App\Http\Controllers\Api\V1\NewsController;
@@ -66,5 +67,8 @@ Route::prefix('v1/')->namespace('api/v1/')->group(function () {
     Route::get('size/{slug}', [ProductController::class, 'size']);
     Route::get('standard/{slug}', [ProductController::class, 'standard']);
     Route::get('product-show/{slug}', [ProductController::class, 'show']);
+
+
+    Route::get('home-index', [HomeController::class, 'index']);
 
 });
