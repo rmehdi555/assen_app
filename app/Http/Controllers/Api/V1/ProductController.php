@@ -260,8 +260,7 @@ class ProductController extends Controller
             'seo_canonical' => $product->seo_canonical,
             'price' => $price,
             'fluctuation_pric' => $product->fluctuationPrice(),
+            'updated_at' => showDate($product->updated_at, 'Y/m/d'),
         ], __('messages.item_found_success'));
-
-
     }
 }
