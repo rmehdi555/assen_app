@@ -12,12 +12,14 @@ use App\Http\Resources\ProductIndexResource;
 use App\Http\Resources\SizeIndexResource;
 use App\Models\Article;
 use App\Models\CrawlerProduct;
+use App\Models\Exchanges;
 use App\Models\Factories;
 use App\Models\ProductCategories;
 use App\Models\Products;
 use App\Models\Sizes;
 use App\Models\Standards;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Config;
 
 class ProductController extends Controller
 {
@@ -55,21 +57,34 @@ class ProductController extends Controller
                 isset($request->q),
                 fn($q) => $q->where('products.title', 'Like', '%' . $request->q . '%')
             )
-            ->orderBy('priority','desc')
+            ->orderBy('priority', 'desc')
             ->get();
 //            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
 
-        $factories = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
-        $sizes = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
+        $factories = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority', 'desc')->get();
+        $sizes = Sizes::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority', 'desc')->get();
         $data = [];
-        foreach ($products->groupBy('factory_id') as $key => $value) {
-            $factory = Factories::find($key);
-            $data[] = [
-                'factory_title' => $factory->title,
-                'factory_slug' => $factory->slug,
-                'products' => ProductIndexResource::collection($value)
-            ];
+
+        if (isset($request->sort_type) and $request->sort_type == 'size') {
+            foreach ($products->groupBy('size_id') as $key => $value) {
+                $factory = Sizes::find($key);
+                $data[] = [
+                    'size_title' => $factory->title,
+                    'size_slug' => $factory->slug,
+                    'products' => ProductIndexResource::collection($value)
+                ];
+            }
+        } else {
+            foreach ($products->groupBy('factory_id') as $key => $value) {
+                $factory = Factories::find($key);
+                $data[] = [
+                    'factory_title' => $factory->title,
+                    'factory_slug' => $factory->slug,
+                    'products' => ProductIndexResource::collection($value)
+                ];
+            }
         }
+
 
         if (!empty($category->images))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($category->images)->images->original, 'caption' => $category->title];
@@ -124,8 +139,8 @@ class ProductController extends Controller
             ->get();
 //            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
 
-        $factories = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
-        $sizes = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
+        $factories = Factories::where('is_show', true)->where('product_categories_id', $factory->category->id)->orderBy('priority', 'desc')->get();
+        $sizes = Sizes::where('is_show', true)->where('product_categories_id', $factory->category->id)->orderBy('priority', 'desc')->get();
         if (!empty($factory->images))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($factory->images)->images->original, 'caption' => $factory->title];
         else
@@ -179,8 +194,8 @@ class ProductController extends Controller
             ->get();
 //            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
 
-        $factories = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
-        $sizes = Factories::where('is_show', true)->where('product_categories_id', $category->id)->orderBy('priority','desc')->get();
+        $factories = Factories::where('is_show', true)->where('product_categories_id', $size->category->id)->orderBy('priority', 'desc')->get();
+        $sizes = Sizes::where('is_show', true)->where('product_categories_id', $size->category->id)->orderBy('priority', 'desc')->get();
         if (!empty($size->images))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($size->images)->images->original, 'caption' => $size->title];
         else
@@ -214,7 +229,26 @@ class ProductController extends Controller
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($product->images)->images->original, 'caption' => $product->title];
         else
             $image = ['path' => config('app.admin_site_url_file') . $product->thumbnail->path, 'caption' => $product->thumbnail->caption];
+
+        if (Config::get('custom.exchange_price') == 'IRR') {
+            $price = $product->price;
+        } elseif (Config::get('custom.exchange_price') == 'USD' and $product->price != 0) {
+            $price = round($product->price / Exchanges::find(1)->value, 2);
+        } elseif (Config::get('custom.exchange_price') == 'EUR' and $product->price != 0) {
+            $price = round($product->price / Exchanges::find(2)->value, 2);
+        } else
+            $price = 0;
+
         return $this->successResponse([
+            'id' => $product->id,
+            'category_title' => $product->category->title,
+            'category_slug' => $product->category->slug,
+            'factory_title' => $product->factory->title,
+            'factory_slug' => $product->factory->slug,
+            'size_title' => $product->size->title,
+            'size_slug' => $product->size->slug,
+            'standard_title' => $product->standard->title,
+            'standard_slug' => $product->standard->slug,
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $product->title,
@@ -224,6 +258,8 @@ class ProductController extends Controller
             'seo_follow' => $product->seo_follow,
             'seo_index' => $product->seo_index,
             'seo_canonical' => $product->seo_canonical,
+            'price' => $price,
+            'fluctuation_pric' => $product->fluctuationPrice(),
         ], __('messages.item_found_success'));
 
 

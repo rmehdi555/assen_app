@@ -56,8 +56,6 @@ Route::prefix('v1/')->namespace('api/v1/')->group(function () {
     Route::get('article-category', [ArticlesCatergoryController::class, 'index']);
     Route::post('category-show', [ArticlesCatergoryController::class, 'show']);
     Route::get('article-show/{slug}', [ArticlesController::class, 'show']);
-    Route::get('article-future', [ArticlesController::class, 'future']);
-    Route::get('article-most-view', [ArticlesController::class, 'mostView']);
     Route::get('sitemap.xml', [SitemapController::class, 'index']);
     Route::get('robot', [SitemapController::class, 'robot']);
     Route::get('sliders', [SlidersController::class, 'index']);
@@ -70,5 +68,7 @@ Route::prefix('v1/')->namespace('api/v1/')->group(function () {
 
 
     Route::get('home-index', [HomeController::class, 'index']);
+    Route::post('counseling', [HomeController::class, 'counseling']);
+    Route::post('contact', [ContactController::class, 'index']);
 
 });

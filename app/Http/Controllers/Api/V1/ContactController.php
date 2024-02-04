@@ -11,14 +11,14 @@ use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-        public function index(ContactRequest $request): JsonResponse
+    public function index(ContactRequest $request): JsonResponse
     {
         $news = Contact::create([
             "email" => $request->email,
             "name" => $request->name,
-            "cell_number" => $request->cell_number,
-            "description" => $request->description,
-
+            "family" => $request->family,
+            "phone" => $request->phone,
+            "body" => $request->body,
         ]);
         return $this->successResponse($news->id, __('messages.contact_saved_successfully'));
 

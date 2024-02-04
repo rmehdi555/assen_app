@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Counseling\CounselingRequest;
 use App\Http\Resources\ArticleindexResource;
 use App\Http\Resources\ProductIndexResource;
 use App\Http\Resources\SlidersResource;
 use App\Models\Article;
+use App\Models\Counseling;
 use App\Models\Factories;
 use App\Models\ProductCategories;
 use App\Models\Products;
 use App\Models\Sizes;
 use App\Models\Sliders;
+use App\Services\Payment\Request;
 use Illuminate\Http\JsonResponse;
 
 class HomeController extends Controller
@@ -38,5 +41,15 @@ class HomeController extends Controller
             'productTables' => $productTables,
             'articles' => ArticleindexResource::collection($articles),
         ], '');
+    }
+
+    public function counseling(CounselingRequest $request): JsonResponse
+    {
+        $counseling = Counseling::create([
+            "name" => $request->name,
+            "phone" => $request->phone,
+        ]);
+        return $this->successResponse($counseling->id, __('messages.counseling_saved_successfully'));
+
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\V1\Contact;
+namespace App\Http\Requests\V1\Counseling;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ContactRequest extends FormRequest
+class CounselingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,8 @@ class ContactRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            'name'=>'required|string',
-            'family'=>'required|string',
-            'phone'=>'required|string',
-            'body'=>'required|string',
+            'name'=>'required|string|max:255',
+            'phone'=>'required|min:11|max:11',
         ];
     }
 }

@@ -52,4 +52,15 @@ class Products extends Model
         return $this->belongsTo(File::class, 'file_id');
     }
 
+    public function scopeOldPrice()
+    {
+        return $this->price_old;
+    }
+
+    public function scopeFluctuationPrice()
+    {
+        return round((($this->price - $this->price_old) / $this->price_old) * 100, 2);
+    }
+
+
 }

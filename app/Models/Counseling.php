@@ -2,25 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Contact extends Model
+class Counseling extends Model
 {
     use SoftDeletes;
-    protected $table = 'contact_us';
+
 
     protected $fillable = [
-        'email',
         'name',
-        'family',
         'phone',
-        'body',
-        'status'
-    ];
-
-    protected $hidden = [
-        'created_at',
-        'updated_at',
     ];
 }
