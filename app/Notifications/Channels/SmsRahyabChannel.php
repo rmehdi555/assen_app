@@ -11,6 +11,6 @@ class SmsRahyabChannel
     {
         $number = $notifiable->cell_number;
         $message = $notification->toRahyab('text')['text'];
-        return Rahyabsms::send($number, $message . ' چارسوق');
+        return Rahyabsms::send($number, $message . ' آسن');
     }
 }
