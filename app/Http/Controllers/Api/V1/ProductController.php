@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Classes\AxessoWebService;
 use App\Classes\AxessoWebServiceDTO;
 use App\Classes\Calculator;
+use App\Enum\ProductDelivery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Product\ProductIndexRequest;
 use App\Http\Resources\FactoryIndexResource;
@@ -260,6 +261,7 @@ class ProductController extends Controller
             'seo_canonical' => $product->seo_canonical,
             'price' => $price,
             'fluctuation_pric' => $product->fluctuationPrice(),
+            'place_of_delivery' => ProductDelivery::fromName($product->place_of_delivery)->value,
             'updated_at' => showDate($product->updated_at, 'Y/m/d'),
         ], __('messages.item_found_success'));
     }
