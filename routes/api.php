@@ -65,6 +65,7 @@ Route::prefix('v1/')->namespace('api/v1/')->group(function () {
     Route::get('size/{slug}', [ProductController::class, 'size']);
     Route::get('standard/{slug}', [ProductController::class, 'standard']);
     Route::get('product-show/{slug}', [ProductController::class, 'show']);
+    Route::get('product-chart/{slug}', [ProductController::class, 'chart']);
 
 
     Route::get('home-index', [HomeController::class, 'index']);

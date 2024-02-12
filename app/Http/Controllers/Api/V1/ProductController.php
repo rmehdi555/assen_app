@@ -16,9 +16,12 @@ use App\Models\CrawlerProduct;
 use App\Models\Exchanges;
 use App\Models\Factories;
 use App\Models\ProductCategories;
+use App\Models\ProductPriceLogs;
 use App\Models\Products;
 use App\Models\Sizes;
 use App\Models\Standards;
+use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Config;
 
@@ -263,6 +266,68 @@ class ProductController extends Controller
             'fluctuation_pric' => $product->fluctuationPrice(),
             'place_of_delivery' => ProductDelivery::fromName($product->place_of_delivery)->value,
             'updated_at' => showDate($product->updated_at, 'Y/m/d'),
+        ], __('messages.item_found_success'));
+    }
+
+    public function chart($slug)
+    {
+        $product = Products::whereSlug($slug)->where('is_show', true)->first();
+        if (!$product)
+            return $this->errorResponse(__('messages.field_not_find'), 404);
+
+        $prices7 = ProductPriceLogs::where('product_id', $product->id)->whereDate('created_at', '>=', Carbon::now()->subDays(7))->orderBy('created_at')->get();
+        $prices30 = ProductPriceLogs::where('product_id', $product->id)->whereDate('created_at', '>=', Carbon::now()->subDays(30))->orderBy('created_at')->get();
+        $prices90 = ProductPriceLogs::where('product_id', $product->id)->whereDate('created_at', '>=', Carbon::now()->subDays(90))->orderBy('created_at')->get();
+        $pricesAll = ProductPriceLogs::where('product_id', $product->id)->orderBy('created_at')->get();
+
+
+        $results7 = $prices7->groupBy(function ($item, $key) {
+            return showDate($item['created_at'], 'Y/m/d');
+        });
+        $results7 = $results7->map(function ($item, $key) {
+            return $item[0]->price;
+        });
+
+        $results30 = $prices30->groupBy(function ($item, $key) {
+            return showDate($item['created_at'], 'Y/m/d');
+        });
+        $results30 = $results30->map(function ($item, $key) {
+            return $item[0]->price;
+        });
+
+
+        $results90 = $prices90->groupBy(function ($item, $key) {
+            return showDate($item['created_at'], 'Y/m/d');
+        });
+        $results90 = $results90->map(function ($item, $key) {
+            return $item[0]->price;
+        });
+
+        $resultsAll = $pricesAll->groupBy(function ($item, $key) {
+            return showDate($item['created_at'], 'Y/m/d');
+        });
+        $resultsAll = $resultsAll->map(function ($item, $key) {
+            return $item[0]->price;
+        });
+
+
+        return $this->successResponse([
+            'prices_7_day' => [
+                'x' => array_keys($results7->toArray()),
+                'y' => array_values($results7->toArray())
+            ],
+            'prices_30_day' => [
+                'x' => array_keys($results30->toArray()),
+                'y' => array_values($results30->toArray())
+            ],
+            'prices_90_day' => [
+                'x' => array_keys($results90->toArray()),
+                'y' => array_values($results90->toArray())
+            ],
+            'prices_all_day' => [
+                'x' => array_keys($resultsAll->toArray()),
+                'y' => array_values($resultsAll->toArray())
+            ],
         ], __('messages.item_found_success'));
     }
 }
