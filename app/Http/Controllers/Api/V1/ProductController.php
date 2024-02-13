@@ -90,10 +90,11 @@ class ProductController extends Controller
         }
 
 
-        if (!empty($category->images))
+        if (!empty($category->images) and isset(json_decode($category->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($category->images)->images->original, 'caption' => $category->title];
-        else
-            $image = ['path' => config('app.admin_site_url_file') . $category->thumbnail->path, 'caption' => $category->thumbnail->caption];
+        elseif (isset($category->thumbnail->path) and isset($category->thumbnail->caption))
+            $image = ['path' => config('app.admin_site_url_file') . $category->thumbnail->path ?? '', 'caption' => $category->thumbnail->caption ?? ''];
+        else $image = ['path' => '', 'caption' => ''];
         return $this->successResponse([
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
