@@ -90,7 +90,7 @@ class ProductController extends Controller
         }
 
 
-        if (!empty($category->images) and isset(json_decode($category->images)->images->original))
+        if ($category->file_id == 0 and isset(json_decode($category->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($category->images)->images->original, 'caption' => $category->title];
         elseif (isset($category->thumbnail->path) and isset($category->thumbnail->caption))
             $image = ['path' => config('app.admin_site_url_file') . $category->thumbnail->path ?? '', 'caption' => $category->thumbnail->caption ?? ''];
@@ -146,10 +146,13 @@ class ProductController extends Controller
 
         $factories = Factories::where('is_show', true)->where('product_categories_id', $factory->category->id)->orderBy('priority', 'desc')->get();
         $sizes = Sizes::where('is_show', true)->where('product_categories_id', $factory->category->id)->orderBy('priority', 'desc')->get();
-        if (!empty($factory->images))
+        if ($factory->file_id == 0 and isset(json_decode($factory->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($factory->images)->images->original, 'caption' => $factory->title];
-        else
-            $image = ['path' => config('app.admin_site_url_file') . $factory->thumbnail->path, 'caption' => $factory->thumbnail->caption];
+        elseif (isset($factory->thumbnail->path) and isset($factory->thumbnail->caption))
+            $image = ['path' => config('app.admin_site_url_file') . $factory->thumbnail->path ?? '', 'caption' => $factory->thumbnail->caption ?? ''];
+        else $image = ['path' => '', 'caption' => ''];
+
+
         return $this->successResponse([
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
@@ -201,10 +204,13 @@ class ProductController extends Controller
 
         $factories = Factories::where('is_show', true)->where('product_categories_id', $size->category->id)->orderBy('priority', 'desc')->get();
         $sizes = Sizes::where('is_show', true)->where('product_categories_id', $size->category->id)->orderBy('priority', 'desc')->get();
-        if (!empty($size->images))
+        if ($size->file_id == 0 and isset(json_decode($size->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($size->images)->images->original, 'caption' => $size->title];
-        else
-            $image = ['path' => config('app.admin_site_url_file') . $size->thumbnail->path, 'caption' => $size->thumbnail->caption];
+        elseif (isset($size->thumbnail->path) and isset($size->thumbnail->caption))
+            $image = ['path' => config('app.admin_site_url_file') . $size->thumbnail->path ?? '', 'caption' => $size->thumbnail->caption ?? ''];
+        else $image = ['path' => '', 'caption' => ''];
+
+
         return $this->successResponse([
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
@@ -230,10 +236,12 @@ class ProductController extends Controller
         if (!$product)
             return $this->errorResponse(__('messages.field_not_find'), 404);
 
-        if (!empty($product->images))
+        if ($product->file_id == 0 and isset(json_decode($product->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($product->images)->images->original, 'caption' => $product->title];
-        else
-            $image = ['path' => config('app.admin_site_url_file') . $product->thumbnail->path, 'caption' => $product->thumbnail->caption];
+        elseif (isset($product->thumbnail->path) and isset($product->thumbnail->caption))
+            $image = ['path' => config('app.admin_site_url_file') . $product->thumbnail->path ?? '', 'caption' => $product->thumbnail->caption ?? ''];
+        else $image = ['path' => '', 'caption' => ''];
+
 
         if (Config::get('custom.exchange_price') == 'IRR') {
             $price = $product->price;

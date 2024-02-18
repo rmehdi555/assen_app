@@ -14,10 +14,12 @@ class ArticleShowResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        if (!empty($this->images))
+        if ($this->file_id == 0 and isset(json_decode($this->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($this->images)->images->original, 'caption' => $this->title];
-        else
-            $image = ['path' => config('app.admin_site_url_file') . $this->thumbnail->path, 'caption' => $this->thumbnail->caption];
+        elseif (isset($this->thumbnail->path) and isset($this->thumbnail->caption))
+            $image = ['path' => config('app.admin_site_url_file') . $this->thumbnail->path ?? '', 'caption' => $this->thumbnail->caption ?? ''];
+        else $image = ['path' => '', 'caption' => ''];
+
         return [
             'category' => ['title' => $this->category->title, 'slug' => $this->category->slug],
             'title' => $this->title,
@@ -30,7 +32,7 @@ class ArticleShowResource extends JsonResource
             'seo_follow' => $this->seo_follow,
             'seo_index' => $this->seo_index,
             'seo_canonical' => $this->seo_canonical,
-            'author' => $this->author->name.' '.$this->author->family,
+            'author' => $this->author->name . ' ' . $this->author->family,
             'created_by' => $this->author->name,
             'created_at' => showDate($this->created_at),
         ];
