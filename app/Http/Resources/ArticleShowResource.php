@@ -17,7 +17,7 @@ class ArticleShowResource extends JsonResource
         if ($this->file_id == 0 and isset(json_decode($this->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($this->images)->images->original, 'caption' => $this->title];
         elseif (isset($this->thumbnail->path) and isset($this->thumbnail->caption))
-            $image = ['path' => config('app.admin_site_url_file') . $this->thumbnail->path ?? '', 'caption' => $this->thumbnail->caption ?? ''];
+            $image = ['path' => $this->thumbnail->path ?? '', 'caption' => $this->thumbnail->caption ?? ''];
         else $image = ['path' => '', 'caption' => ''];
 
         return [

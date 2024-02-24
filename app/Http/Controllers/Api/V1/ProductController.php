@@ -93,7 +93,7 @@ class ProductController extends Controller
         if ($category->file_id == 0 and isset(json_decode($category->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($category->images)->images->original, 'caption' => $category->title];
         elseif (isset($category->thumbnail->path) and isset($category->thumbnail->caption))
-            $image = ['path' => config('app.admin_site_url_file') . $category->thumbnail->path ?? '', 'caption' => $category->thumbnail->caption ?? ''];
+            $image = ['path' => $category->thumbnail->path ?? '', 'caption' => $category->thumbnail->caption ?? ''];
         else $image = ['path' => '', 'caption' => ''];
         return $this->successResponse([
             'image_path' => $image['path'],
@@ -149,7 +149,7 @@ class ProductController extends Controller
         if ($factory->file_id == 0 and isset(json_decode($factory->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($factory->images)->images->original, 'caption' => $factory->title];
         elseif (isset($factory->thumbnail->path) and isset($factory->thumbnail->caption))
-            $image = ['path' => config('app.admin_site_url_file') . $factory->thumbnail->path ?? '', 'caption' => $factory->thumbnail->caption ?? ''];
+            $image = ['path' => $factory->thumbnail->path ?? '', 'caption' => $factory->thumbnail->caption ?? ''];
         else $image = ['path' => '', 'caption' => ''];
 
 
@@ -207,7 +207,7 @@ class ProductController extends Controller
         if ($size->file_id == 0 and isset(json_decode($size->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($size->images)->images->original, 'caption' => $size->title];
         elseif (isset($size->thumbnail->path) and isset($size->thumbnail->caption))
-            $image = ['path' => config('app.admin_site_url_file') . $size->thumbnail->path ?? '', 'caption' => $size->thumbnail->caption ?? ''];
+            $image = ['path' => $size->thumbnail->path ?? '', 'caption' => $size->thumbnail->caption ?? ''];
         else $image = ['path' => '', 'caption' => ''];
 
 
@@ -239,7 +239,7 @@ class ProductController extends Controller
         if ($product->file_id == 0 and isset(json_decode($product->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($product->images)->images->original, 'caption' => $product->title];
         elseif (isset($product->thumbnail->path) and isset($product->thumbnail->caption))
-            $image = ['path' => config('app.admin_site_url_file') . $product->thumbnail->path ?? '', 'caption' => $product->thumbnail->caption ?? ''];
+            $image = ['path' => $product->thumbnail->path ?? '', 'caption' => $product->thumbnail->caption ?? ''];
         else $image = ['path' => '', 'caption' => ''];
 
 
