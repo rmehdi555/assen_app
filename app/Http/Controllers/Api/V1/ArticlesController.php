@@ -17,7 +17,12 @@ class ArticlesController extends Controller
 {
     public function index(ArticlesIndexRequest $request): JsonResponse
     {
-        $articles = Article::where('is_show', true)->with(['category', 'thumbnail', 'author'])->latest()
+        $articles = Article::where('is_show', true)->with(['category', 'thumbnail', 'author'])
+            ->when(
+                isset($request->q),
+                fn($query) => $query->where('articles.title', 'Like', '%' . $request->q . '%')
+            )
+            ->latest()
             ->paginate($request->count);
         return $this->successResponse([
             'articles' => ArticleindexResource::collection($articles),
