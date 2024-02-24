@@ -89,6 +89,10 @@ class ProductController extends Controller
             }
         }
 
+        $body = $category->body;
+        $body = str_replace('src="../../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+        $body = str_replace('src="../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+
 
         if ($category->file_id == 0 and isset(json_decode($category->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($category->images)->images->original, 'caption' => $category->title];
@@ -99,7 +103,7 @@ class ProductController extends Controller
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $category->title,
-            'body' => $category->body,
+            'body' => $body,
             'seo_title' => $category->seo_title,
             'seo_description' => $category->seo_description,
             'seo_follow' => $category->seo_follow,
@@ -153,11 +157,16 @@ class ProductController extends Controller
         else $image = ['path' => '', 'caption' => ''];
 
 
+        $body = $factory->body;
+        $body = str_replace('src="../../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+        $body = str_replace('src="../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+
+
         return $this->successResponse([
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $factory->title,
-            'body' => $factory->body,
+            'body' => $body,
             'seo_title' => $factory->seo_title,
             'seo_description' => $factory->seo_description,
             'seo_follow' => $factory->seo_follow,
@@ -210,12 +219,16 @@ class ProductController extends Controller
             $image = ['path' => $size->thumbnail->path ?? '', 'caption' => $size->thumbnail->caption ?? ''];
         else $image = ['path' => '', 'caption' => ''];
 
+        $body = $size->body;
+        $body = str_replace('src="../../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+        $body = str_replace('src="../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+
 
         return $this->successResponse([
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $size->title,
-            'body' => $size->body,
+            'body' => $body,
             'seo_title' => $size->seo_title,
             'seo_description' => $size->seo_description,
             'seo_follow' => $size->seo_follow,
@@ -235,6 +248,10 @@ class ProductController extends Controller
         $product = Products::whereSlug($slug)->where('is_show', true)->first();
         if (!$product)
             return $this->errorResponse(__('messages.field_not_find'), 404);
+
+        $body = $product->body;
+        $body = str_replace('src="../../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+        $body = str_replace('src="../../storage', 'src="' . config('app.admin_site_url_file'), $body);
 
         if ($product->file_id == 0 and isset(json_decode($product->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($product->images)->images->original, 'caption' => $product->title];
@@ -265,7 +282,7 @@ class ProductController extends Controller
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $product->title,
-            'body' => $product->body,
+            'body' => $body,
             'seo_title' => $product->seo_title,
             'seo_description' => $product->seo_description,
             'seo_follow' => $product->seo_follow,

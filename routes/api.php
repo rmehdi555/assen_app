@@ -56,6 +56,7 @@ Route::prefix('v1/')->namespace('api/v1/')->group(function () {
     Route::get('article-category', [ArticlesCatergoryController::class, 'index']);
     Route::post('category-show', [ArticlesCatergoryController::class, 'show']);
     Route::get('article-show/{slug}', [ArticlesController::class, 'show']);
+    Route::get('article-search', [ArticlesController::class, 'search']);
     Route::get('sitemap.xml', [SitemapController::class, 'index']);
     Route::get('robot', [SitemapController::class, 'robot']);
     Route::get('sliders', [SlidersController::class, 'index']);

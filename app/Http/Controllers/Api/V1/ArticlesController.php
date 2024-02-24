@@ -9,6 +9,7 @@ use App\Http\Resources\ArticleindexResource;
 use App\Http\Resources\ArticleShowResource;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\Products;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -36,5 +37,23 @@ class ArticlesController extends Controller
         $article->increment('view_count');
         $data = new ArticleShowResource($article);
         return $this->successResponse($data, '');
+    }
+
+    public function search(ArticlesIndexRequest $request)
+    {
+        $articles = Article::where('is_show', true)->with(['category', 'thumbnail', 'author'])
+            ->when(
+                isset($request->q),
+                fn($query) => $query->where('articles.title', 'Like', '%' . $request->q . '%')
+            )
+            ->latest()
+            ->paginate($request->count);
+        return $this->successResponse([
+            'articles' => ArticleindexResource::collection($articles),
+            'total' => $articles->total(),
+            'perPage' => $articles->perPage(),
+            'currentPage' => $articles->currentPage(),
+            'lastPage' => $articles->lastPage(),
+        ], '');
     }
 }

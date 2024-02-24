@@ -14,6 +14,12 @@ class ArticleShowResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $body = $this->body;
+        $body = str_replace('src="../../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+        $body = str_replace('src="../../storage', 'src="' . config('app.admin_site_url_file'), $body);
+        $body = str_replace('href="../../../storage', 'href="' . config('app.admin_site_url_file'), $body);
+        $body = str_replace('href="../../storage', 'href="' . config('app.admin_site_url_file'), $body);
+
         if ($this->file_id == 0 and isset(json_decode($this->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($this->images)->images->original, 'caption' => $this->title];
         elseif (isset($this->thumbnail->path) and isset($this->thumbnail->caption))
@@ -25,7 +31,7 @@ class ArticleShowResource extends JsonResource
             'title' => $this->title,
             'description' => $this->description,
             'slug' => $this->slug,
-            'body' => $this->body,
+            'body' => $body,
             'image' => $image,
             'seo_title' => $this->seo_title,
             'seo_description' => $this->seo_description,
