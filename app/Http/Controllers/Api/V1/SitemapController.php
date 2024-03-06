@@ -35,14 +35,14 @@ class SitemapController extends Controller
         $data[$count]['changeFrequency'] = "always";
         $data[$count]['priority'] = 0.9;
         $count += 1;
-        $data[$count]['url'] = "https://charsooq.com/contact-us";
+        $data[$count]['url'] = "https://assen.ir/contact-us";
         $data[$count]['lastModified'] = $time;
         $data[$count]['changeFrequency'] = "always";
         $data[$count]['priority'] = 0.9;
         $count += 1;
         $articles = Article::select('slug')->get();
         foreach ($articles as $article) {
-            $data[$count]['url'] = "https://charsooq.com/{$article->slug}";
+            $data[$count]['url'] = "https://assen.ir/{$article->slug}";
             $data[$count]['lastModified'] = $time;
             $data[$count]['changeFrequency'] = "always";
             $data[$count]['priority'] = 0.9;
@@ -51,7 +51,7 @@ class SitemapController extends Controller
         }
         $products = Products::select('slug')->get();
         foreach ($products as $item) {
-            $data[$count]['url'] = "https://charsooq.com/product/{$item->slug}";
+            $data[$count]['url'] = "https://assen.ir/product/{$item->slug}";
             $data[$count]['lastModified'] = $time;
             $data[$count]['changeFrequency'] = "always";
             $data[$count]['priority'] = 0.9;
@@ -59,7 +59,7 @@ class SitemapController extends Controller
         }
         $productCategories = ProductCategories::select('slug')->get();
         foreach ($productCategories as $item) {
-            $data[$count]['url'] = "https://charsooq.com/category/{$item->slug}";
+            $data[$count]['url'] = "https://assen.ir/category/{$item->slug}";
             $data[$count]['lastModified'] = $time;
             $data[$count]['changeFrequency'] = "always";
             $data[$count]['priority'] = 0.9;
@@ -67,7 +67,7 @@ class SitemapController extends Controller
         }
         $factories = Factories::select('slug')->get();
         foreach ($factories as $item) {
-            $data[$count]['url'] = "https://charsooq.com/factory/{$item->slug}";
+            $data[$count]['url'] = "https://assen.ir/factory/{$item->slug}";
             $data[$count]['lastModified'] = $time;
             $data[$count]['changeFrequency'] = "always";
             $data[$count]['priority'] = 0.9;
@@ -75,7 +75,7 @@ class SitemapController extends Controller
         }
         $sizes = Sizes::select('slug')->get();
         foreach ($sizes as $item) {
-            $data[$count]['url'] = "https://charsooq.com/size/{$item->slug}";
+            $data[$count]['url'] = "https://assen.ir/size/{$item->slug}";
             $data[$count]['lastModified'] = $time;
             $data[$count]['changeFrequency'] = "always";
             $data[$count]['priority'] = 0.9;
