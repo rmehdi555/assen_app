@@ -43,7 +43,8 @@ class ProductController extends Controller
             $size = Sizes::whereSlug($request->size_slug)->where('is_show', true)->first();
 
 
-        $products = Products::where('is_show', true)->with(['category', 'thumbnail'])
+        $products = Products::where('products.is_show', true)->with(['category', 'thumbnail'])
+            ->join('factories', 'products.factory_id', 'factories.id')
             ->where('products.product_categories_id', $category->id)
             ->when(
                 isset($factory->id),
@@ -61,7 +62,7 @@ class ProductController extends Controller
                 isset($request->q),
                 fn($q) => $q->where('products.title', 'Like', '%' . $request->q . '%')
             )
-            ->orderBy('priority', 'desc')
+            ->orderBy('factories.priority', 'desc')
             ->get();
 //            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
 
@@ -71,10 +72,10 @@ class ProductController extends Controller
 
         if (isset($request->sort_type) and $request->sort_type == 'size') {
             foreach ($products->groupBy('size_id') as $key => $value) {
-                $factory = Sizes::find($key);
+                $size = Sizes::find($key);
                 $data[] = [
-                    'size_title' => $factory->title,
-                    'size_slug' => $factory->slug,
+                    'size_title' => 'قیمت' . ' ' . $size->title,
+                    'size_slug' => $size->slug,
                     'products' => ProductIndexResource::collection($value)
                 ];
             }
@@ -82,7 +83,7 @@ class ProductController extends Controller
             foreach ($products->groupBy('factory_id') as $key => $value) {
                 $factory = Factories::find($key);
                 $data[] = [
-                    'factory_title' => $factory->title,
+                    'factory_title' => 'قیمت' . ' ' . $factory->title,
                     'factory_slug' => $factory->slug,
                     'products' => ProductIndexResource::collection($value)
                 ];
@@ -99,6 +100,7 @@ class ProductController extends Controller
         elseif (isset($category->thumbnail->path) and isset($category->thumbnail->caption))
             $image = ['path' => $category->thumbnail->path ?? '', 'caption' => $category->thumbnail->caption ?? ''];
         else $image = ['path' => '', 'caption' => ''];
+
         return $this->successResponse([
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
@@ -165,7 +167,7 @@ class ProductController extends Controller
         return $this->successResponse([
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
-            'title' => $factory->title,
+            'title' => 'قیمت' . ' ' . $factory->title,
             'body' => $body,
             'seo_title' => $factory->seo_title,
             'seo_description' => $factory->seo_description,
