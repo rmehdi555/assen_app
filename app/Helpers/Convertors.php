@@ -2,6 +2,9 @@
 
 namespace App\Helpers;
 
+use App\Models\Exchanges;
+use Illuminate\Support\Facades\Config;
+
 class Convertors
 {
     public static function weightConverter($weighttype, $weightvalue): float|int|string
@@ -49,6 +52,22 @@ class Convertors
         $dts = str_replace(str_split(' -:'), '', $dts) + $num;
 
         return $dts;
+    }
+
+    public static function changePrice($price, $exchange = 'Toman')
+    {
+        if ($exchange == 'IRR') {
+            $resultPrice = $price;
+        } elseif ($exchange == 'Toman' and $price != 0) {
+            $resultPrice = round($price / 10, 0);
+        } elseif ($exchange == 'USD' and $price != 0) {
+            $resultPrice = round($price / Exchanges::find(1)->value, 2);
+        } elseif ($exchange == 'EUR' and $price != 0) {
+            $resultPrice = round($price / Exchanges::find(2)->value, 2);
+        } else
+            $resultPrice = 0;
+
+        return $resultPrice;
     }
 
 }

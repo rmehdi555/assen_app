@@ -6,6 +6,7 @@ use App\Classes\AxessoWebService;
 use App\Classes\AxessoWebServiceDTO;
 use App\Classes\Calculator;
 use App\Enum\ProductDelivery;
+use App\Helpers\Convertors;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Product\ProductIndexRequest;
 use App\Http\Resources\FactoryIndexResource;
@@ -261,15 +262,7 @@ class ProductController extends Controller
             $image = ['path' => $product->thumbnail->path ?? '', 'caption' => $product->thumbnail->caption ?? ''];
         else $image = ['path' => '', 'caption' => ''];
 
-
-        if (Config::get('custom.exchange_price') == 'IRR') {
-            $price = $product->price;
-        } elseif (Config::get('custom.exchange_price') == 'USD' and $product->price != 0) {
-            $price = round($product->price / Exchanges::find(1)->value, 2);
-        } elseif (Config::get('custom.exchange_price') == 'EUR' and $product->price != 0) {
-            $price = round($product->price / Exchanges::find(2)->value, 2);
-        } else
-            $price = 0;
+        $price = Convertors::changePrice($product->price, Config::get('custom.exchange_price'));
 
         return $this->successResponse([
             'id' => $product->id,

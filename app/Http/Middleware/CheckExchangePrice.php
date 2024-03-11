@@ -22,6 +22,8 @@ class CheckExchangePrice
             Config::set('custom.exchange_price', 'EUR');
         if ($request->input('exchange_price') == 'IRR')
             Config::set('custom.exchange_price', 'IRR');
+        if ($request->input('exchange_price') == 'Toman')
+            Config::set('custom.exchange_price', 'Toman');
 
         return $next($request);
     }
