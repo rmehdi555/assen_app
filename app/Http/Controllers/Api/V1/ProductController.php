@@ -44,7 +44,7 @@ class ProductController extends Controller
             $size = Sizes::whereSlug($request->size_slug)->where('is_show', true)->first();
 
 
-        $products = Products::where('products.is_show', true)->with(['category', 'thumbnail'])
+        $products = Products::select('products.*')->where('products.is_show', true)->with(['category', 'thumbnail'])
             ->join('factories', 'products.factory_id', 'factories.id')
             ->where('products.product_categories_id', $category->id)
             ->when(
