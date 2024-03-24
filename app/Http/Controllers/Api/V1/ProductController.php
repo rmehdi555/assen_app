@@ -147,7 +147,7 @@ class ProductController extends Controller
                 isset($request->q),
                 fn($q) => $q->where('products.title', 'Like', '%' . $request->q . '%')
             )
-            ->latest()
+            ->orderBy('priority', 'desc')
             ->get();
 //            ->paginate(isset($request->count) ?? config('custom.paginate_count'));
 
