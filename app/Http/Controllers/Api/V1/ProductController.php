@@ -34,30 +34,37 @@ class ProductController extends Controller
         if (!$category)
             return $this->errorResponse(__('messages.field_not_find'), 404);
 
-        if (isset($request->factory_slug))
-            $factory = Factories::whereSlug($request->factory_slug)->where('is_show', true)->first();
+        if (isset($request->factory_slug)) {
+            $slugs = explode(',', $request->factory_slug);
+            $factoryIds = Factories::whereIn('slug', $slugs)->where('is_show', true)->pluck('id');
+        }
 
-        if (isset($request->standard_slug))
-            $standard = Standards::whereSlug($request->standard_slug)->where('is_show', true)->first();
+        if (isset($request->standard_slug)) {
+            $slugs = explode(',', $request->standard_slug);
+            $standardIds = Standards::whereIn('slug', $slugs)->where('is_show', true)->pluck('id');
+        }
 
-        if (isset($request->size_slug))
-            $size = Sizes::whereSlug($request->size_slug)->where('is_show', true)->first();
+
+        if (isset($request->size_slug)) {
+            $slugs = explode(',', $request->size_slug);
+            $sizeIds = Sizes::whereIn('slug', $slugs)->where('is_show', true)->pluck('id');
+        }
 
 
         $products = Products::select('products.*')->where('products.is_show', true)->with(['category', 'thumbnail'])
             ->join('factories', 'products.factory_id', 'factories.id')
             ->where('products.product_categories_id', $category->id)
             ->when(
-                isset($factory->id),
-                fn($q) => $q->where('products.factory_id', $factory->id)
+                isset($factoryIds[0]),
+                fn($q) => $q->whereIn('products.factory_id', $factoryIds)
             )
             ->when(
-                isset($standard->id),
-                fn($q) => $q->where('products.standard_id', $standard->id)
+                isset($standardIds[0]),
+                fn($q) => $q->where('products.standard_id', $standardIds)
             )
             ->when(
-                isset($size->id),
-                fn($q) => $q->where('products.size_id', $size->id)
+                isset($sizeIds[0]),
+                fn($q) => $q->where('products.size_id', $sizeIds)
             )
             ->when(
                 isset($request->q),
@@ -106,6 +113,7 @@ class ProductController extends Controller
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $category->title,
+            'slug' => $category->slug,
             'body' => $body,
             'seo_title' => $category->seo_title,
             'seo_description' => $category->seo_description,
@@ -126,22 +134,28 @@ class ProductController extends Controller
         if (!$factory)
             return $this->errorResponse(__('messages.field_not_find'), 404);
 
-        if (isset($request->standard_slug))
-            $standard = Standards::whereSlug($request->standard_slug)->where('is_show', true)->first();
 
-        if (isset($request->size_slug))
-            $size = Sizes::whereSlug($request->size_slug)->where('is_show', true)->first();
+        if (isset($request->standard_slug)) {
+            $slugs = explode(',', $request->standard_slug);
+            $standardIds = Standards::whereIn('slug', $slugs)->where('is_show', true)->pluck('id');
+        }
+
+
+        if (isset($request->size_slug)) {
+            $slugs = explode(',', $request->size_slug);
+            $sizeIds = Sizes::whereIn('slug', $slugs)->where('is_show', true)->pluck('id');
+        }
 
 
         $products = Products::where('is_show', true)->with(['category', 'thumbnail'])
             ->where('products.factory_id', $factory->id)
             ->when(
-                isset($standard->id),
-                fn($q) => $q->where('products.standard_id', $standard->id)
+                isset($standardIds[0]),
+                fn($q) => $q->where('products.standard_id', $standardIds)
             )
             ->when(
-                isset($size->id),
-                fn($q) => $q->where('products.size_id', $size->id)
+                isset($sizeIds[0]),
+                fn($q) => $q->where('products.size_id', $sizeIds)
             )
             ->when(
                 isset($request->q),
@@ -175,6 +189,8 @@ class ProductController extends Controller
             'seo_follow' => $factory->seo_follow,
             'seo_index' => $factory->seo_index,
             'seo_canonical' => $factory->seo_canonical,
+            'category_title' => $factory->category->title,
+            'category_slug' => $factory->category->slug,
             'data' => ProductIndexResource::collection($products),
             'factories' => FactoryIndexResource::collection($factories),
             'sizes' => SizeIndexResource::collection($sizes),
@@ -189,22 +205,27 @@ class ProductController extends Controller
         if (!$size)
             return $this->errorResponse(__('messages.field_not_find'), 404);
 
-        if (isset($request->factory_slug))
-            $factory = Factories::whereSlug($request->factory_slug)->where('is_show', true)->first();
 
-        if (isset($request->standard_slug))
-            $standard = Standards::whereSlug($request->standard_slug)->where('is_show', true)->first();
+        if (isset($request->factory_slug)) {
+            $slugs = explode(',', $request->factory_slug);
+            $factoryIds = Factories::whereIn('slug', $slugs)->where('is_show', true)->pluck('id');
+        }
+
+        if (isset($request->standard_slug)) {
+            $slugs = explode(',', $request->standard_slug);
+            $standardIds = Standards::whereIn('slug', $slugs)->where('is_show', true)->pluck('id');
+        }
 
 
         $products = Products::where('is_show', true)->with(['category', 'thumbnail'])
             ->where('products.size_id', $size->id)
             ->when(
-                isset($standard->id),
-                fn($q) => $q->where('products.standard_id', $standard->id)
+                isset($factoryIds[0]),
+                fn($q) => $q->whereIn('products.factory_id', $factoryIds)
             )
             ->when(
-                isset($factory->id),
-                fn($q) => $q->where('products.factory_id', $factory->id)
+                isset($standardIds[0]),
+                fn($q) => $q->where('products.standard_id', $standardIds)
             )
             ->when(
                 isset($request->q),
@@ -237,6 +258,8 @@ class ProductController extends Controller
             'seo_follow' => $size->seo_follow,
             'seo_index' => $size->seo_index,
             'seo_canonical' => $size->seo_canonical,
+            'category_title' => $size->category->title,
+            'category_slug' => $size->category->slug,
             'data' => ProductIndexResource::collection($products),
             'factories' => FactoryIndexResource::collection($factories),
             'sizes' => SizeIndexResource::collection($sizes),
