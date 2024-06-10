@@ -60,11 +60,11 @@ class ProductController extends Controller
             )
             ->when(
                 isset($standardIds[0]),
-                fn($q) => $q->where('products.standard_id', $standardIds)
+                fn($q) => $q->whereIn('products.standard_id', $standardIds)
             )
             ->when(
                 isset($sizeIds[0]),
-                fn($q) => $q->where('products.size_id', $sizeIds)
+                fn($q) => $q->whereIn('products.size_id', $sizeIds)
             )
             ->when(
                 isset($request->q),
@@ -151,11 +151,11 @@ class ProductController extends Controller
             ->where('products.factory_id', $factory->id)
             ->when(
                 isset($standardIds[0]),
-                fn($q) => $q->where('products.standard_id', $standardIds)
+                fn($q) => $q->whereIn('products.standard_id', $standardIds)
             )
             ->when(
                 isset($sizeIds[0]),
-                fn($q) => $q->where('products.size_id', $sizeIds)
+                fn($q) => $q->whereIn('products.size_id', $sizeIds)
             )
             ->when(
                 isset($request->q),
