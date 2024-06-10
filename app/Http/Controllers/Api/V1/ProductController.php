@@ -225,7 +225,7 @@ class ProductController extends Controller
             )
             ->when(
                 isset($standardIds[0]),
-                fn($q) => $q->where('products.standard_id', $standardIds)
+                fn($q) => $q->whereIn('products.standard_id', $standardIds)
             )
             ->when(
                 isset($request->q),
