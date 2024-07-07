@@ -59,7 +59,10 @@ class Products extends Model
 
     public function scopeFluctuationPrice()
     {
-        return round((($this->price - $this->price_old) / $this->price_old) * 100, 2);
+        if ($this->price_old != 0)
+            return round((($this->price - $this->price_old) / $this->price_old) * 100, 2);
+        else
+            return 0;
     }
 
 
