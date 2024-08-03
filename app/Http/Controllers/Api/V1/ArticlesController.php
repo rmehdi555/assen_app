@@ -22,7 +22,8 @@ class ArticlesController extends Controller
                 isset($request->q),
                 fn($query) => $query->where('articles.title', 'Like', '%' . $request->q . '%')
             )
-            ->latest()
+            //->latest()
+            ->orderBy('published_at', 'desc')
             ->paginate($request->count);
         return $this->successResponse([
             'articles' => ArticleindexResource::collection($articles),
@@ -51,7 +52,7 @@ class ArticlesController extends Controller
                 isset($request->q),
                 fn($query) => $query->where('articles.title', 'Like', '%' . $request->q . '%')
             )
-            ->latest()
+            ->orderBy('published_at', 'desc')
             ->paginate($request->count);
         return $this->successResponse([
             'articles' => ArticleindexResource::collection($articles),
