@@ -30,7 +30,6 @@ class Article extends Model
         'seo_index',
         'seo_canonical',
         'published_at'
-
     ];
 
     public function category(): BelongsTo

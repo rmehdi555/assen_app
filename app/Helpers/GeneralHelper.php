@@ -123,8 +123,7 @@ if (!function_exists('extractAsinAmazon')) {
 if (!function_exists('showDate')) {
     function showDate($date, $format = 'Y-m-d H:i:s')
     {
-        $date = $date->toJalali();
-        return $date->format($format);
+        return verta($date)->format($format);
     }
 }
 

@@ -34,7 +34,7 @@ class ArticleindexResource extends JsonResource
             'seo_canonical' => $this->seo_canonical,
             'author' => $this->author->name . ' ' . $this->author->family,
             'created_by' => $this->author->name,
-            'created_at' => showDate($this->created_at),
+            'created_at' => showDate($this->published_at),
         ];
     }
 }
