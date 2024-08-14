@@ -54,6 +54,7 @@ class ProductController extends Controller
         $products = Products::select('products.*')->where('products.is_show', true)->with(['category', 'thumbnail'])
             ->join('factories', 'products.factory_id', 'factories.id')
             ->where('products.product_categories_id', $category->id)
+            ->where('factories.is_show', true)
             ->when(
                 isset($factoryIds[0]),
                 fn($q) => $q->whereIn('products.factory_id', $factoryIds)
