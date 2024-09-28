@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -41,6 +42,12 @@ class ArticleShowResource extends JsonResource
             'author' => $this->author->name . ' ' . $this->author->family,
             'created_by' => $this->author->name,
             'created_at' => showDate($this->created_at),
+            'comments' => Comment::where('is_show', true)
+                ->where('type', 'article')
+                ->where('type_slug', $this->slug)
+                ->select('comment', 'rate')
+                ->get()
+                ->toArray(),
         ];
     }
 }

@@ -7,8 +7,10 @@ use App\Http\Requests\V1\Articles\ArticlesCategoryRequest;
 use App\Http\Requests\V1\Articles\ArticlesIndexRequest;
 use App\Http\Resources\ArticleindexResource;
 use App\Http\Resources\ArticleShowResource;
+use App\Http\Resources\CommentResource;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\Comment;
 use App\Models\Products;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -42,6 +44,7 @@ class ArticlesController extends Controller
             return $this->errorResponse(__('messages.field_not_find'), 404);
         $article->increment('view_count');
         $data = new ArticleShowResource($article);
+
         return $this->successResponse($data, '');
     }
 

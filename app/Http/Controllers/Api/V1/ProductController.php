@@ -13,6 +13,7 @@ use App\Http\Resources\FactoryIndexResource;
 use App\Http\Resources\ProductIndexResource;
 use App\Http\Resources\SizeIndexResource;
 use App\Models\Article;
+use App\Models\Comment;
 use App\Models\CrawlerProduct;
 use App\Models\Exchanges;
 use App\Models\Factories;
@@ -195,6 +196,12 @@ class ProductController extends Controller
             'data' => ProductIndexResource::collection($products),
             'factories' => FactoryIndexResource::collection($factories),
             'sizes' => SizeIndexResource::collection($sizes),
+            'comments' => Comment::where('is_show', true)
+                ->where('type', 'factory')
+                ->where('type_slug', $slug)
+                ->select('comment', 'rate')
+                ->get()
+                ->toArray(),
         ], __('messages.item_found_success'));
 
 
@@ -264,6 +271,12 @@ class ProductController extends Controller
             'data' => ProductIndexResource::collection($products),
             'factories' => FactoryIndexResource::collection($factories),
             'sizes' => SizeIndexResource::collection($sizes),
+            'comments' => Comment::where('is_show', true)
+                ->where('type', 'size')
+                ->where('type_slug', $slug)
+                ->select('comment', 'rate')
+                ->get()
+                ->toArray(),
         ], __('messages.item_found_success'));
 
 
@@ -311,6 +324,12 @@ class ProductController extends Controller
             'fluctuation_pric' => $product->fluctuationPrice(),
             'place_of_delivery' => ProductDelivery::fromName($product->place_of_delivery)->value,
             'updated_at' => showDate($product->updated_at, 'Y/m/d'),
+            'comments' => Comment::where('is_show', true)
+                ->where('type', 'product')
+                ->where('type_slug', $slug)
+                ->select('comment', 'rate')
+                ->get()
+                ->toArray(),
         ], __('messages.item_found_success'));
     }
 

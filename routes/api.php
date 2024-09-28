@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\CalculatorController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CartFrontController;
 use App\Http\Controllers\Api\V1\CheckUrlController;
+use App\Http\Controllers\Api\V1\CommentController;
 use App\Http\Controllers\Api\V1\ContactController;
 use App\Http\Controllers\Api\V1\DashbboardController;
 use App\Http\Controllers\Api\V1\EbayProdouctController;
@@ -72,5 +73,7 @@ Route::prefix('v1/')->namespace('api/v1/')->group(function () {
     Route::get('home-index', [HomeController::class, 'index']);
     Route::post('counseling', [HomeController::class, 'counseling']);
     Route::post('contact', [ContactController::class, 'index']);
+//    Route::get('comment', [CommentController::class, 'index']);
+    Route::post('comment', [CommentController::class, 'index']);
 
 });
