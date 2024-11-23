@@ -41,7 +41,8 @@ class ArticleShowResource extends JsonResource
             'seo_canonical' => $this->seo_canonical,
             'author' => $this->author->name . ' ' . $this->author->family,
             'created_by' => $this->author->name,
-            'created_at' => showDate($this->created_at),
+            'created_at' => showDate($this->created_at, 'Y/m/d'),
+            'updated_at' => showDate($this->updated_at ?? $this->created_at, 'Y/m/d'),
             'comments' => Comment::where('is_show', true)
                 ->where('type', 'article')
                 ->where('type_slug', $this->slug)
