@@ -115,6 +115,7 @@ class ProductController extends Controller
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $category->title,
+            'title_h1' => $category->title_h1 ?? '',
             'slug' => $category->slug,
             'body' => $body,
             'seo_title' => $category->seo_title . ' ( ' . showDate(now(), '%d %B %Y') . ' )',
@@ -186,6 +187,7 @@ class ProductController extends Controller
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => 'قیمت' . ' ' . $factory->title,
+            'title_h1' => $factory->title_h1 ?? '',
             'body' => $body,
             'seo_title' => $factory->seo_title . ' ( ' . showDate(now(), '%d %B %Y') . ' )',
             'seo_description' => $factory->seo_description,
@@ -262,6 +264,7 @@ class ProductController extends Controller
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $size->title,
+            'title_h1' => $size->title_h1 ?? '',
             'body' => $body,
             'seo_title' => $size->seo_title,
             'seo_description' => $size->seo_description,
@@ -284,7 +287,6 @@ class ProductController extends Controller
 
 
     }
-
 
     public function show($slug)
     {
@@ -317,6 +319,7 @@ class ProductController extends Controller
             'image_path' => $image['path'],
             'image_caption' => $image['caption'],
             'title' => $product->title,
+            'title_h1' => $product->title_h1 ?? '',
             'body' => $body,
             'seo_title' => $product->seo_title,
             'seo_description' => $product->seo_description,

@@ -14,7 +14,7 @@ class ProductCategories extends Model
      */
     use SoftDeletes;
     protected $fillable = [
-        'title', 'slug', 'description','body','parent_id','images','tags','icon','priority','status',
+        'title', 'title_h1','slug', 'description','body','parent_id','images','tags','icon','priority','status',
         'seo_title','seo_description','seo_follow','seo_index','seo_canonical','is_show'
     ];
     /**

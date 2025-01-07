@@ -17,6 +17,7 @@ class CreateFactoriesTable extends Migration
             $table->id();
             $table->text('title');
             $table->string('tag_title');
+            $table->text('title_h1');
             $table->text('slug')->nullable();
             $table->text('body')->nullable();
             $table->bigInteger('user_id')->unsigned();
