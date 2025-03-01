@@ -42,7 +42,7 @@ class ArticlesController extends Controller
             ->with(['category', 'thumbnail'])->first();
         if (!$article)
             return $this->errorResponse(__('messages.field_not_find'), 404);
-        $article->increment('view_count');
+       // $article->increment('view_count');
         $data = new ArticleShowResource($article);
 
         return $this->successResponse($data, '');
