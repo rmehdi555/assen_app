@@ -327,6 +327,7 @@ class ProductController extends Controller
             'seo_index' => $product->seo_index,
             'seo_canonical' => $product->seo_canonical,
             'price' => $price,
+            'is_show_price' => $product->is_show_price,
             'fluctuation_pric' => $product->fluctuationPrice(),
             'place_of_delivery' => ProductDelivery::fromName($product->place_of_delivery)->value,
             'updated_at' => showDate($product->updated_at, 'Y/m/d'),
