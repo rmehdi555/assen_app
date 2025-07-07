@@ -37,6 +37,9 @@ class ProductIndexResource extends JsonResource
             'fluctuation_pric' => $this->fluctuationPrice(),
             'place_of_delivery' => ProductDelivery::fromName($this->place_of_delivery)->value,
             'updated_at' => showDate($this->updated_at, 'Y/m/d'),
+            'detail_state' => $this->detail_state,
+            'detail_width' => $this->detail_width,
+            'detail_length' => $this->detail_length,
         ];
     }
 }

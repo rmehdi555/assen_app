@@ -17,7 +17,7 @@ class Products extends Model
 
     protected $fillable = [
         'title', 'title_h1', 'slug', 'product_categories_id', 'discount', 'type', 'description', 'body', 'price', 'price_usd', 'price_euro', 'price_old', 'unit', 'is_show', 'is_show_price', 'images', 'tags', 'priority', 'status', 'place_of_delivery', 'updated_at', 'tag_title',
-        'seo_title', 'seo_description', 'seo_follow', 'seo_index', 'seo_canonical', 'schema', 'factory_id', 'standard_id', 'size_id'
+        'seo_title', 'seo_description', 'seo_follow', 'seo_index', 'seo_canonical', 'schema', 'factory_id', 'standard_id', 'size_id', 'detail_state', 'detail_width', 'detail_length'
     ];
 
     /**

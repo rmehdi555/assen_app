@@ -32,6 +32,9 @@ class CreateProductsTable extends Migration
             $table->string('size',50);
             $table->string('standard',50);
             $table->string('unit',50);
+            $table->string('detail_state')->nullable();
+            $table->string('detail_width')->nullable();
+            $table->string('detail_length')->nullable();
             $table->double('discount')->default(0);
             $table->string('type')->default('normal');
             $table->enum('place_of_delivery', ['store', 'factory'])->default('store');
