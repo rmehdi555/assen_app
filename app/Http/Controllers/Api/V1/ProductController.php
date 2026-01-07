@@ -100,7 +100,88 @@ class ProductController extends Controller
             }
         }
 
-        $body = $category->body;
+        // محاسبه قیمت‌های محصولات این دسته‌بندی (از قیمت فعلی محصولات)
+        $today = Carbon::today();
+        
+        // دریافت قیمت‌ها از محصولات فعلی (فقط محصولاتی که is_show_price = 1)
+        $productsWithPrices = $products->filter(function($product) {
+            return $product->price > 0 && $product->is_show_price == 1;
+        });
+        
+        // دریافت product_id های محصولاتی که is_show_price = 1 برای استفاده در لاگ‌ها
+        $productIds = $productsWithPrices->pluck('id')->toArray();
+        
+        $todayPrices = $productsWithPrices->pluck('price')->map(function($price) {
+            return (float) $price;
+        });
+        $todayPricesArray = $todayPrices->toArray();
+        $minPrice = !empty($todayPricesArray) ? min($todayPricesArray) : 0;
+        $maxPrice = !empty($todayPricesArray) ? max($todayPricesArray) : 0;
+        $cheapestPrice = $minPrice; // ارزان‌ترین
+        $expensivePrice = $maxPrice; // گران‌ترین
+        
+        // پیدا کردن محصولات با ارزان‌ترین و گران‌ترین قیمت
+        $cheapestProduct = null;
+        $expensiveProduct = null;
+        
+        if ($minPrice > 0) {
+            $cheapestProduct = $productsWithPrices->where('price', $minPrice)->first();
+        }
+        
+        if ($maxPrice > 0) {
+            $expensiveProduct = $productsWithPrices->where('price', $maxPrice)->first();
+        }
+        
+        // تبدیل قیمت‌ها به فرمت مناسب
+        $minPriceFormatted = $minPrice > 0 ? Convertors::changePrice($minPrice, Config::get('custom.exchange_price')) : 0;
+        $maxPriceFormatted = $maxPrice > 0 ? Convertors::changePrice($maxPrice, Config::get('custom.exchange_price')) : 0;
+        $cheapestPriceFormatted = $cheapestPrice > 0 ? Convertors::changePrice($cheapestPrice, Config::get('custom.exchange_price')) : 0;
+        $expensivePriceFormatted = $expensivePrice > 0 ? Convertors::changePrice($expensivePrice, Config::get('custom.exchange_price')) : 0;
+        
+        // محاسبه وضعیت قیمت نسبت به دیروز
+        $yesterday = Carbon::yesterday();
+        
+        // میانگین قیمت امروز از محصولات (استفاده از همان $todayPrices که قبلاً تعریف شد)
+        $todayAvgPrice = $todayPrices->isNotEmpty() ? $todayPrices->avg() : 0;
+        
+        // میانگین قیمت دیروز از لاگ‌ها
+        $yesterdayPrices = ProductPriceLogs::whereIn('product_id', $productIds)
+            ->whereDate('created_at', $yesterday)
+            ->pluck('price')
+            ->map(function($price) {
+                return (float) $price;
+            })
+            ->filter(function($price) {
+                return $price > 0;
+            });
+        $yesterdayAvgPrice = $yesterdayPrices->isNotEmpty() ? $yesterdayPrices->avg() : 0;
+        
+        // تعیین وضعیت قیمت
+        $priceStatus = 'ثابت';
+        if ($todayAvgPrice > 0 && $yesterdayAvgPrice > 0) {
+            if ($todayAvgPrice > $yesterdayAvgPrice) {
+                $priceStatus = 'صعودی';
+            } elseif ($todayAvgPrice < $yesterdayAvgPrice) {
+                $priceStatus = 'نزولی';
+            }
+        }
+        
+        // تاریخ امروز به صورت پویا
+        $todayDate = showDate(now(), 'Y/m/d');
+        
+        // ساخت متن با جایگزینی X ها
+        $introText = '' .$category->title .
+         ' ( ' .  verta(now())->formatWord('l') .' '. $todayDate . ' ) به ازای هر کیلو بین ' .
+          number_format($minPriceFormatted) . '  ریال تا' . number_format($maxPriceFormatted) . 
+          ' ریال اعلام شد . روند ' .$category->title . ' نسبت به روز گذشته ( ' .
+          $priceStatus . 
+          ' )  بود. '. 
+          $category->title .
+          ' ارزانترین ' . ($cheapestProduct ? $cheapestProduct->title . ' با قیمت ' : '') . number_format($cheapestPriceFormatted) . 
+          '  و گرانترین ' . ($expensiveProduct ? $expensiveProduct->title . ' با قیمت ' : '') . number_format($expensivePriceFormatted) .
+          ' در بازار بود.';
+        
+        $body = $introText . $category->body;
         $body = str_replace('src="../../../storage', 'src="' . config('app.admin_site_url_file'), $body);
         $body = str_replace('src="../../storage', 'src="' . config('app.admin_site_url_file'), $body);
 
@@ -171,6 +252,88 @@ class ProductController extends Controller
 
         $factories = Factories::where('is_show', true)->where('product_categories_id', $factory->category->id)->orderBy('priority', 'desc')->get();
         $sizes = Sizes::where('is_show', true)->where('product_categories_id', $factory->category->id)->orderBy('priority', 'desc')->get();
+        
+        // محاسبه قیمت‌های محصولات این کارخانه (از قیمت فعلی محصولات)
+        $today = Carbon::today();
+        
+        // دریافت قیمت‌ها از محصولات فعلی (فقط محصولاتی که is_show_price = 1)
+        $productsWithPrices = $products->filter(function($product) {
+            return $product->price > 0 && $product->is_show_price == 1;
+        });
+        
+        // دریافت product_id های محصولاتی که is_show_price = 1 برای استفاده در لاگ‌ها
+        $productIds = $productsWithPrices->pluck('id')->toArray();
+        
+        $todayPrices = $productsWithPrices->pluck('price')->map(function($price) {
+            return (float) $price;
+        });
+        $todayPricesArray = $todayPrices->toArray();
+        $minPrice = !empty($todayPricesArray) ? min($todayPricesArray) : 0;
+        $maxPrice = !empty($todayPricesArray) ? max($todayPricesArray) : 0;
+        $cheapestPrice = $minPrice; // ارزان‌ترین
+        $expensivePrice = $maxPrice; // گران‌ترین
+        
+        // پیدا کردن محصولات با ارزان‌ترین و گران‌ترین قیمت
+        $cheapestProduct = null;
+        $expensiveProduct = null;
+        
+        if ($minPrice > 0) {
+            $cheapestProduct = $productsWithPrices->where('price', $minPrice)->first();
+        }
+        
+        if ($maxPrice > 0) {
+            $expensiveProduct = $productsWithPrices->where('price', $maxPrice)->first();
+        }
+        
+        // تبدیل قیمت‌ها به فرمت مناسب
+        $minPriceFormatted = $minPrice > 0 ? Convertors::changePrice($minPrice, Config::get('custom.exchange_price')) : 0;
+        $maxPriceFormatted = $maxPrice > 0 ? Convertors::changePrice($maxPrice, Config::get('custom.exchange_price')) : 0;
+        $cheapestPriceFormatted = $cheapestPrice > 0 ? Convertors::changePrice($cheapestPrice, Config::get('custom.exchange_price')) : 0;
+        $expensivePriceFormatted = $expensivePrice > 0 ? Convertors::changePrice($expensivePrice, Config::get('custom.exchange_price')) : 0;
+        
+        // محاسبه وضعیت قیمت نسبت به دیروز
+        $yesterday = Carbon::yesterday();
+        
+        // میانگین قیمت امروز از محصولات (استفاده از همان $todayPrices که قبلاً تعریف شد)
+        $todayAvgPrice = $todayPrices->isNotEmpty() ? $todayPrices->avg() : 0;
+        
+        // میانگین قیمت دیروز از لاگ‌ها
+        $yesterdayPrices = ProductPriceLogs::whereIn('product_id', $productIds)
+            ->whereDate('created_at', $yesterday)
+            ->pluck('price')
+            ->map(function($price) {
+                return (float) $price;
+            })
+            ->filter(function($price) {
+                return $price > 0;
+            });
+        $yesterdayAvgPrice = $yesterdayPrices->isNotEmpty() ? $yesterdayPrices->avg() : 0;
+        
+        // تعیین وضعیت قیمت
+        $priceStatus = 'ثابت';
+        if ($todayAvgPrice > 0 && $yesterdayAvgPrice > 0) {
+            if ($todayAvgPrice > $yesterdayAvgPrice) {
+                $priceStatus = 'صعودی';
+            } elseif ($todayAvgPrice < $yesterdayAvgPrice) {
+                $priceStatus = 'نزولی';
+            }
+        }
+        
+        // تاریخ امروز به صورت پویا
+        $todayDate = showDate(now(), 'Y/m/d');
+        
+        // ساخت متن با جایگزینی X ها
+        $introText = 
+         ' امروز ' .  verta(now())->formatWord('l') .' '. $todayDate . ' قیمت ' . $factory->title .'  به ازای هر کیلو بین ' .
+          number_format($minPriceFormatted) . '  ریال تا' . number_format($maxPriceFormatted) . 
+          ' ریال اعلام شد . روند ' . $factory->title . ' نسبت به روز گذشته ( ' .
+          $priceStatus . 
+          ' )  بود. '. 
+          $factory->title .
+          ' ارزانترین ' . ($cheapestProduct ? $cheapestProduct->title . ' با قیمت ' : '') . number_format($cheapestPriceFormatted) . 
+          '  و گرانترین ' . ($expensiveProduct ? $expensiveProduct->title . ' با قیمت ' : '') . number_format($expensivePriceFormatted) .
+           $factory->category->title .' کارخانه '. $factory->title . ' قیمت گذاری شدند .';
+        
         if ($factory->file_id == 0 and isset(json_decode($factory->images)->images->original))
             $image = ['path' => config('app.admin_site_url_file_old') . json_decode($factory->images)->images->original, 'caption' => $factory->title];
         elseif (isset($factory->thumbnail->path) and isset($factory->thumbnail->caption))
@@ -178,7 +341,7 @@ class ProductController extends Controller
         else $image = ['path' => '', 'caption' => ''];
 
 
-        $body = $factory->body;
+        $body = $introText . $factory->body;
         $body = str_replace('src="../../../storage', 'src="' . config('app.admin_site_url_file'), $body);
         $body = str_replace('src="../../storage', 'src="' . config('app.admin_site_url_file'), $body);
 
