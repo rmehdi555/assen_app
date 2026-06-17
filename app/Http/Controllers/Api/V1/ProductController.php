@@ -171,15 +171,16 @@ class ProductController extends Controller
         
         // ساخت متن با جایگزینی X ها
         $introText = '' .$category->title .
-         ' ( ' .  verta(now())->formatWord('l') .' '. $todayDate . ' ) به ازای هر کیلو بین ' .
-          number_format($minPriceFormatted) . '  ریال تا' . number_format($maxPriceFormatted) . 
-          ' ریال اعلام شد . روند ' .$category->title . ' نسبت به روز گذشته ( ' .
+         ' امروز ( ' .  verta(now())->formatWord('l') .' '. $todayDate . ' ) به ازای هر کیلو بین ' .
+          number_format($minPriceFormatted) . '  تومان تا' . number_format($maxPriceFormatted) . 
+          ' تومان در نوسان بود . در حالی که روند قیمت نسبت به روز گذشته ' . '( ' .
           $priceStatus . 
           ' )  بود. '. 
           $category->title .
-          ' ارزانترین ' . ($cheapestProduct ? $cheapestProduct->title . ' با قیمت ' : '') . number_format($cheapestPriceFormatted) . 
-          '  و گرانترین ' . ($expensiveProduct ? $expensiveProduct->title . ' با قیمت ' : '') . number_format($expensivePriceFormatted) .
-          ' در بازار بود.';
+          ' ' . ($cheapestProduct ? $cheapestProduct->title . ' با قیمت ' : '') . number_format($cheapestPriceFormatted) . 
+          '  ارزانترین محصول و' . ($expensiveProduct ? $expensiveProduct->title . ' با قیمت ' : '') . number_format($expensivePriceFormatted) .
+          'به ازای هر کیلوگرم ، گرانترین '. 
+          $category->title . ' در بازار بودند.';
         
         $body = $introText . $category->body;
         $body = str_replace('src="../../../storage', 'src="' . config('app.admin_site_url_file'), $body);
@@ -324,14 +325,13 @@ class ProductController extends Controller
         
         // ساخت متن با جایگزینی X ها
         $introText = 
-         ' امروز ' .  verta(now())->formatWord('l') .' '. $todayDate . ' قیمت ' . $factory->title .'  به ازای هر کیلو بین ' .
-          number_format($minPriceFormatted) . '  ریال تا' . number_format($maxPriceFormatted) . 
-          ' ریال اعلام شد . روند ' . $factory->title . ' نسبت به روز گذشته ( ' .
+         ' امروز ' .  verta(now())->formatWord('l') .' '. $todayDate . ' قیمت ' . $factory->title .'  بین ' .
+          number_format($minPriceFormatted) . '  تومان تا' . number_format($maxPriceFormatted) . 
+          ' تومان به ازای هر کیلوگرم اعلام شد . روند ' . $factory->title . ' نسبت به روز گذشته ( ' .
           $priceStatus . 
-          ' )  بود. '. 
-          $factory->title .
-          ' ارزانترین ' . ($cheapestProduct ? $cheapestProduct->title . ' با قیمت ' : '') . number_format($cheapestPriceFormatted) . 
-          '  و گرانترین ' . ($expensiveProduct ? $expensiveProduct->title . ' با قیمت ' : '') . number_format($expensivePriceFormatted) .
+          ' )  بود. '. ($cheapestProduct ? $cheapestProduct->title . ' با قیمت ' : '') . number_format($cheapestPriceFormatted) . 
+          ' ارزانترین محصول و' . ($expensiveProduct ? $expensiveProduct->title . ' با قیمت ' : '') . number_format($expensivePriceFormatted) .
+          'گرانترین '.
            $factory->category->title .' کارخانه '. $factory->title . ' قیمت گذاری شدند .';
         
         if ($factory->file_id == 0 and isset(json_decode($factory->images)->images->original))
